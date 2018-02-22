@@ -19,17 +19,17 @@
 
 package uk.co.caprica.vlcjinfo;
 
+
 import java.io.OutputStreamWriter;
 
 public class VlcjInfoTest {
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            System.out.println("Specify a media file name");
-            System.exit(1);
-        }
-
-        MediaInfo mediaInfo = MediaInfo.mediaInfo(args[0]);
+    	System.load("C:/Program Files/MediaInfo/MediaInfo.dll");
+    	
+        String file = "C:\\Users\\nbhushan\\Documents\\testData\\DreamLooks.MP4";
+        MediaInfo mediaInfo = MediaInfo.mediaInfo(file);
+        
         mediaInfo.dump(new OutputStreamWriter(System.out));
 
         Section video = mediaInfo.first("Video");
@@ -43,5 +43,6 @@ public class VlcjInfoTest {
 
         Section audio = mediaInfo.first("Audio");
         System.out.printf("Duration Last Frame %s%n", audio.duration("Duration_LastFrame"));
+    	
     }
 }
