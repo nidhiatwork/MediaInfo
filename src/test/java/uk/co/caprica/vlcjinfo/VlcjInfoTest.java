@@ -20,14 +20,30 @@
 package uk.co.caprica.vlcjinfo;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 public class VlcjInfoTest {
 
     public static void main(String[] args) throws Exception {
+    	
+    	File file1 = new File("C:\\Users\\nbhushan\\newfile.txt");
+try {
+	      if (file1.createNewFile()){
+	        System.out.println("File is created!");
+	      }else{
+	        System.out.println("File already exists.");
+	      }
+
+  	} catch (IOException e) {
+	      e.printStackTrace();
+  	}
+    	
+    	
     	System.load("C:/Program Files/MediaInfo/MediaInfo.dll");
     	
-        String file = "C:\\Users\\nbhushan\\Documents\\testData\\DreamLooks.MP4";
+        String file = "C:\\Users\\nbhushan\\Desktop\\TestAutomation\\TestData\\Baseline_clips\\Windows\\Export\\baseline_ntsc-avchd-fullhd_1080i30 to 01_iPhone,iPod - 400x224, 16x9, 29.97, 400kbps.mp4";
         MediaInfo mediaInfo = MediaInfo.mediaInfo(file);
         
         mediaInfo.dump(new OutputStreamWriter(System.out));
@@ -46,3 +62,4 @@ public class VlcjInfoTest {
     	
     }
 }
+
