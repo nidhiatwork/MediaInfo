@@ -26,10 +26,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import uk.co.caprica.vlcjinfo.binding.LibMediaInfo;
-
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
+
+import uk.co.caprica.vlcjinfo.binding.LibMediaInfo;
 
 /**
  * Factory class that creates and parses media information.
