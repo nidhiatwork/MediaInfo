@@ -25,8 +25,8 @@ public class TestBaseline {
 		String old_baselineDataFile = "C:\\Users\\nbhushan\\Desktop\\TestAutomation\\BaselineVerification\\old_baselineData.txt";
 		String excel = "C:\\Users\\nbhushan\\Desktop\\TestAutomation\\Results.xls";
 		String line = null;
-		String baselineFilePath;
-		String exportedFilePath;
+		String baselineMediaPath = null;
+		String exportedMediaPath = null;
 		PrintWriter writer;
 		try {
 			FileReader fileReader = new FileReader(baselineDataFile);
@@ -37,45 +37,7 @@ public class TestBaseline {
 				writer = new PrintWriter(old_baselineDataFile);
 				writer.print(line);
 				writer.close();
-				String[] media = line.split("~~");
-				baselineFolder = media[2];
-				exportedFilePath = media[3];
-				baselineFilePath = getBaselineFile(media[0]);
-
-				MediaInfo mediaInfo1 = MediaInfo.mediaInfo(baselineFilePath);
-				HashMap<String, String> baseline_props = mediaInfo1.dump(new OutputStreamWriter(System.out));
-				Section video = mediaInfo1.first("Video");
-				Integer width = video.integer("Width");
-				Integer height = video.integer("Height");
-				baseline_props.put("width", width.toString());
-				baseline_props.put("height", height.toString());
-				baseline_props.put("ID", video.value("ID"));
-				baseline_props.put("duration", video.value("Duration"));
-				baseline_props.put("framerate", video.value("Frame rate"));
-				Section audio = mediaInfo1.first("Audio");
-				baseline_props.put("durationlastframe", audio.value("Duration_LastFrame"));
-
-				MediaInfo mediaInfo2 = MediaInfo.mediaInfo(exportedFilePath);
-
-				HashMap<String, String> exported_props = mediaInfo2.dump(new OutputStreamWriter(System.out));
-				video = mediaInfo2.first("Video");
-				width = video.integer("Width");
-				height = video.integer("Height");
-				exported_props.put("width", width.toString());
-				exported_props.put("height", height.toString());
-				exported_props.put("ID", video.value("ID"));
-				exported_props.put("duration", video.value("Duration"));
-				exported_props.put("framerate", video.value("Frame rate"));
-				audio = mediaInfo1.first("Audio");
-				exported_props.put("durationlastframe", audio.value("Duration_LastFrame"));
-				baseline_props.remove("Complete name");
-				exported_props.remove("Complete name");
-				String result;
-				
-				if(baseline_props.equals(exported_props))
-					result = "PASS";
-				else
-					result = "FAIL";
+				String[] baselineData = line.split("~~");
 
 				FileInputStream fis = null;
 				fis = new FileInputStream(excel);
@@ -83,10 +45,10 @@ public class TestBaseline {
 				HSSFSheet sheet = null;
 				int paramIndex = 10, baselineIndex = 11, exportedIndex = 12, resultIndex = 13;
 
-				if(media[1].contains("Effects.jsx"))
+				if(baselineData[1].contains("Effects.jsx"))
 					sheet = workbook.getSheet("Effects");		
 
-				else if(media[1].contains("EffectsKeyframing.jsx"))
+				else if(baselineData[1].contains("EffectsKeyframing.jsx"))
 				{
 					sheet = workbook.getSheet("EffectsKeyframing");
 					paramIndex = 8;
@@ -94,60 +56,124 @@ public class TestBaseline {
 					exportedIndex = 11;
 					resultIndex = 12;
 				}
-				else if(media[1].contains("PublishNShare.jsx"))
+				else if(baselineData[1].contains("PublishNShare.jsx"))
 				{
 					sheet = workbook.getSheet("Sharing Center");
 					paramIndex = 13;
 					baselineIndex = 14;
 					exportedIndex = 15;
 					resultIndex = 16;
-				}
-				else if(media[1].contains("TitleSanity.jsx") || media[1].contains("ApplyTextAnimation.jsx") ||  media[1].contains("ApplyTitleTemplate.jsx") || media[1].contains("TextStyles.jsx"))
-					sheet = workbook.getSheet("Title Designer");
-				else
-				{
-					bufferedReader.close();  
-					writer = new PrintWriter(baselineDataFile);
-					writer.print("");
-					writer.close();
-					fis.close();
-					System.exit(0);
-				}
-				for (int rowIndex = 0; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-					Row row = sheet.getRow(rowIndex);
-					if (row != null) {
-						Cell cell = row.getCell(paramIndex);
-						if (cell != null) {
-							// Found column and there is value in the cell.
-							String val = cell.getStringCellValue();
-							if(val.contains(media[0]))
-							{
-								cell = row.createCell(baselineIndex);
-								cell.setCellValue(media[2]);
-								cell = row.createCell(exportedIndex);
-								cell.setCellValue(media[3]);
-								cell = row.createCell(resultIndex);
-								cell.setCellValue(result);
-
+					for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+						Row row = sheet.getRow(rowIndex);
+						if (row != null) {
+							Cell cell = row.getCell(paramIndex);
+							if (cell != null) {
+								// Found column and there is value in the cell.
+								String[] params = cell.getStringCellValue().split(",");
+								if(params[1].equals(baselineData[0]))
+								{
+									cell = row.getCell(baselineIndex);
+									baselineMediaPath = cell.getStringCellValue();
+									break;
+								}
 							}
 						}
 					}
 				}
-				fis.close();
-				FileOutputStream fileOut = new FileOutputStream("C:\\Users\\nbhushan\\Desktop\\TestAutomation\\Results.xls");  
-				workbook.write(fileOut);
-				fileOut.close();
+				else if(baselineData[1].contains("TitleSanity.jsx") || baselineData[1].contains("ApplyTextAnimation.jsx") ||  baselineData[1].contains("ApplyTitleTemplate.jsx") || baselineData[1].contains("TextStyles.jsx"))
+					sheet = workbook.getSheet("Title Designer");
+				else
+				{
+					bufferedReader.close();
+					fis.close();
+					System.out.println("Worksheet name could not be found under Results.xls sheet. Exit from program.");
+					System.exit(0);
+				}
 
+				if(!(baselineData[1].contains("PublishNShare.jsx")))
+				{
+					baselineFolder = baselineData[2];
+					baselineMediaPath = getBaselineFile(baselineData[0]);
+				}
+				if(baselineMediaPath!=null && baselineMediaPath.length()>0)
+				{
+					exportedMediaPath = baselineData[3];
+					MediaInfo mediaInfo1 = MediaInfo.mediaInfo(baselineMediaPath);
+					HashMap<String, String> baseline_props = mediaInfo1.dump(new OutputStreamWriter(System.out));
+					Section video = mediaInfo1.first("Video");
+					Integer width = video.integer("Width");
+					Integer height = video.integer("Height");
+					baseline_props.put("width", width.toString());
+					baseline_props.put("height", height.toString());
+					baseline_props.put("ID", video.value("ID"));
+					baseline_props.put("duration", video.value("Duration"));
+					baseline_props.put("framerate", video.value("Frame rate"));
+					Section audio = mediaInfo1.first("Audio");
+					baseline_props.put("durationlastframe", audio.value("Duration_LastFrame"));
+
+					MediaInfo mediaInfo2 = MediaInfo.mediaInfo(exportedMediaPath);
+
+					HashMap<String, String> exported_props = mediaInfo2.dump(new OutputStreamWriter(System.out));
+					video = mediaInfo2.first("Video");
+					width = video.integer("Width");
+					height = video.integer("Height");
+					exported_props.put("width", width.toString());
+					exported_props.put("height", height.toString());
+					exported_props.put("ID", video.value("ID"));
+					exported_props.put("duration", video.value("Duration"));
+					exported_props.put("framerate", video.value("Frame rate"));
+					audio = mediaInfo1.first("Audio");
+					exported_props.put("durationlastframe", audio.value("Duration_LastFrame"));
+					baseline_props.remove("Complete name");
+					exported_props.remove("Complete name");
+					String result;
+
+					if(baseline_props.equals(exported_props))
+						result = "PASS";
+					else
+						result = "FAIL";
+
+					for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+						Row row = sheet.getRow(rowIndex);
+						if (row != null) {
+							Cell cell = row.getCell(paramIndex);
+							if (cell != null) {
+								// Found column and there is value in the cell.
+								String[] val = cell.getStringCellValue().split(",");
+								if(val[1].equals(baselineData[0]))
+								{
+									cell = row.createCell(baselineIndex);
+									cell.setCellValue(baselineMediaPath);
+									cell = row.createCell(exportedIndex);
+									cell.setCellValue(baselineData[3]);
+									cell = row.createCell(resultIndex);
+									cell.setCellValue(result);
+									break;
+								}
+							}
+						}
+					}
+					fis.close();
+					FileOutputStream fileOut = new FileOutputStream("C:\\Users\\nbhushan\\Desktop\\TestAutomation\\Results.xls");  
+					workbook.write(fileOut);
+					fileOut.close();
+				}
+				else
+				{
+					bufferedReader.close();				
+					fis.close();
+					System.out.println("Baseline media file path could not be found. Please verify location in script file. Exit from program.");
+					System.exit(0);
+				}
 			}
 			bufferedReader.close();  
 			writer = new PrintWriter(baselineDataFile);
 			writer.print("");
 			writer.close();
 		} catch (IOException e) {
-			System.out.println("Error occurred while reading/writing data into file");
+			System.out.println("Error occurred while reading/writing data into results file.");
 			e.printStackTrace();
 		}
-
 	}
 
 	private static String getBaselineFile(String testcaseID) 
