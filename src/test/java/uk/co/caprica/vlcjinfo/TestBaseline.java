@@ -21,9 +21,11 @@ public class TestBaseline {
 	public static void main(String[] args) throws Exception {
 		System.out.println(System.getProperty("java.class.path"));
 		System.load("C:/Program Files/MediaInfo/MediaInfo.dll");
-		String baselineDataFile = "C:\\Users\\nbhushan\\Desktop\\TestAutomation\\BaselineVerification\\baselineData.txt";
-		String old_baselineDataFile = "C:\\Users\\nbhushan\\Desktop\\TestAutomation\\BaselineVerification\\old_baselineData.txt";
-		String excel = "C:\\Users\\nbhushan\\Desktop\\TestAutomation\\Results.xls";
+		String home = System.getProperty("user.home");
+		home = home.replace("\\", "\\\\");
+		String baselineDataFile = home + "\\Desktop\\TestAutomation\\BaselineVerification\\baselineData.txt";
+		String old_baselineDataFile = home + "\\Desktop\\TestAutomation\\BaselineVerification\\old_baselineData.txt";
+		String excel = home + "\\Desktop\\TestAutomation\\Results.xls";
 		String line = null;
 		String baselineMediaPath = null;
 		String exportedMediaPath = null;
@@ -47,7 +49,27 @@ public class TestBaseline {
 
 				if(baselineData[1].contains("Effects.jsx"))
 					sheet = workbook.getSheet("Effects");		
-
+				
+				else if(baselineData[1].contains("Transition.jsx"))
+					sheet = workbook.getSheet("Transitions");		
+				
+				else if(baselineData[1].contains("PublishToISO.jsx"))
+				{
+					sheet = workbook.getSheet("DVD Export");
+					baselineIndex = 22;
+					exportedIndex = 23;
+					resultIndex = 24;
+				}
+				
+				else if(baselineData[1].contains("FileImport.jsx"))		
+					sheet = workbook.getSheet("File Import");
+				
+				else if(baselineData[1].contains("InstantMovie.jsx"))		
+					sheet = workbook.getSheet("Instant Movie");
+				
+				else if(baselineData[1].contains("VideoStory.jsx"))		
+					sheet = workbook.getSheet("VideoStory");
+				
 				else if(baselineData[1].contains("EffectsKeyframing.jsx"))
 				{
 					sheet = workbook.getSheet("EffectsKeyframing");
@@ -118,7 +140,7 @@ public class TestBaseline {
 					width = video.integer("Width");
 					height = video.integer("Height");
 					exported_props.put("width", width.toString());
-					exported_props.put("height", height.toString());
+					exported_props.put ("height", height.toString());
 					exported_props.put("ID", video.value("ID"));
 					exported_props.put("duration", video.value("Duration"));
 					exported_props.put("framerate", video.value("Frame rate"));
@@ -126,6 +148,7 @@ public class TestBaseline {
 					exported_props.put("durationlastframe", audio.value("Duration_LastFrame"));
 					baseline_props.remove("Complete name");
 					exported_props.remove("Complete name");
+					
 					String result;
 
 					if(baseline_props.equals(exported_props))
@@ -154,7 +177,7 @@ public class TestBaseline {
 						}
 					}
 					fis.close();
-					FileOutputStream fileOut = new FileOutputStream("C:\\Users\\nbhushan\\Desktop\\TestAutomation\\Results.xls");  
+					FileOutputStream fileOut = new FileOutputStream(home + "\\Desktop\\TestAutomation\\Results.xls");  
 					workbook.write(fileOut);
 					fileOut.close();
 				}
