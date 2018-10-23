@@ -17,7 +17,7 @@ import org.apache.poi.ss.usermodel.Row;
 public class TestBaseline {
 
 	static String baselineFolder;
-
+	
 	public static void main(String[] args) throws Exception {
 		System.out.println(System.getProperty("java.class.path"));
 		System.load("C:/Program Files/MediaInfo/MediaInfo.dll");
@@ -26,9 +26,11 @@ public class TestBaseline {
 		String baselineDataFile = home + "\\Desktop\\TestAutomation\\BaselineVerification\\baselineData.txt";
 		String old_baselineDataFile = home + "\\Desktop\\TestAutomation\\BaselineVerification\\old_baselineData.txt";
 		String excel = home + "\\Desktop\\TestAutomation\\Results.xls";
+		String resultFile = home + "\\Desktop\\TestAutomation\\baseresult.txt";
 		String line = null;
 		String baselineMediaPath = null;
 		String exportedMediaPath = null;
+		String result = null;
 		PrintWriter writer;
 		try {
 			FileReader fileReader = new FileReader(baselineDataFile);
@@ -85,22 +87,7 @@ public class TestBaseline {
 					baselineIndex = 14;
 					exportedIndex = 15;
 					resultIndex = 16;
-					for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-						Row row = sheet.getRow(rowIndex);
-						if (row != null) {
-							Cell cell = row.getCell(paramIndex);
-							if (cell != null) {
-								// Found column and there is value in the cell.
-								String[] params = cell.getStringCellValue().split(",");
-								if(params[1].equals(baselineData[0]))
-								{
-									cell = row.getCell(baselineIndex);
-									baselineMediaPath = cell.getStringCellValue();
-									break;
-								}
-							}
-						}
-					}
+					
 				}
 				else if(baselineData[1].contains("TitleSanity.jsx") || baselineData[1].contains("ApplyTextAnimation.jsx") ||  baselineData[1].contains("ApplyTitleTemplate.jsx") || baselineData[1].contains("TextStyles.jsx"))
 					sheet = workbook.getSheet("Title Designer");
@@ -112,11 +99,10 @@ public class TestBaseline {
 					System.exit(0);
 				}
 
-				if(!(baselineData[1].contains("PublishNShare.jsx")))
-				{
+				
 					baselineFolder = baselineData[2];
 					baselineMediaPath = getBaselineFile(baselineData[0]);
-				}
+				
 				if(baselineMediaPath!=null && baselineMediaPath.length()>0)
 				{
 					exportedMediaPath = baselineData[3];
@@ -149,8 +135,7 @@ public class TestBaseline {
 					baseline_props.remove("Complete name");
 					exported_props.remove("Complete name");
 					
-					String result;
-
+					
 					if(baseline_props.equals(exported_props))
 						result = "PASS";
 					else
@@ -193,10 +178,15 @@ public class TestBaseline {
 			writer = new PrintWriter(baselineDataFile);
 			writer.print("");
 			writer.close();
+			writer = new PrintWriter(resultFile);
+			writer.print(result);
+			writer.close();
 		} catch (IOException e) {
 			System.out.println("Error occurred while reading/writing data into results file.");
 			e.printStackTrace();
 		}
+		System.out.println("Exit from baseline verification jar.");
+		
 	}
 
 	private static String getBaselineFile(String testcaseID) 
@@ -211,17 +201,17 @@ public class TestBaseline {
 			{
 				if(listOfFiles[i].getName().contains(testcaseID))
 				{
-					file = listOfFiles[i].getName();
+					file = baselineFolder + "\\" + listOfFiles[i].getName();
 					break;
 				}
 			}
 			else if (listOfFiles[i].isDirectory() && listOfFiles[i].getName().contains(testcaseID)) 
 			{
 				baselineFolder = baselineFolder + "\\" + listOfFiles[i].getName();
-				file = getBaselineFile(testcaseID);
+				file = baselineFolder + "\\" + getBaselineFile(testcaseID);
 			}
 		}
-		return baselineFolder + "\\" + file;
+		return  file;
 	}
 }
 
