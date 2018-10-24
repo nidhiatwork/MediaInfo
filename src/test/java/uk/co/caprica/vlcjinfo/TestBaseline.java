@@ -99,11 +99,11 @@ public class TestBaseline {
 					System.exit(0);
 				}
 
-				
 					baselineFolder = baselineData[2];
 					baselineMediaPath = getBaselineFile(baselineData[0]);
+					baselineMediaPath = baselineFolder + "\\" + baselineMediaPath;
 				
-				if(baselineMediaPath!=null && baselineMediaPath.length()>0)
+					if(baselineMediaPath!=null && baselineMediaPath.length()>0)
 				{
 					exportedMediaPath = baselineData[3];
 					MediaInfo mediaInfo1 = MediaInfo.mediaInfo(baselineMediaPath);
@@ -201,14 +201,15 @@ public class TestBaseline {
 			{
 				if(listOfFiles[i].getName().contains(testcaseID))
 				{
-					file = baselineFolder + "\\" + listOfFiles[i].getName();
+					file = listOfFiles[i].getName();
 					break;
 				}
 			}
 			else if (listOfFiles[i].isDirectory() && listOfFiles[i].getName().contains(testcaseID)) 
 			{
 				baselineFolder = baselineFolder + "\\" + listOfFiles[i].getName();
-				file = baselineFolder + "\\" + getBaselineFile(testcaseID);
+				file =  getBaselineFile(testcaseID);
+				break;
 			}
 		}
 		return  file;
