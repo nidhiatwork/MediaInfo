@@ -75,7 +75,7 @@ public class TestBaseline {
 				else if(baselineData[1].contains("EffectsKeyframing.jsx"))
 				{
 					sheet = workbook.getSheet("EffectsKeyframing");
-					paramIndex = 8;
+					paramIndex = 9;
 					baselineIndex = 10;
 					exportedIndex = 11;
 					resultIndex = 12;
