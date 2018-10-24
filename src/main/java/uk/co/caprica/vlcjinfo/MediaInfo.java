@@ -22,13 +22,14 @@ package uk.co.caprica.vlcjinfo;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import uk.co.caprica.vlcjinfo.binding.LibMediaInfo;
-
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;
+
+import uk.co.caprica.vlcjinfo.binding.LibMediaInfo;
 
 /**
  * Factory class that creates and parses media information.
@@ -115,13 +116,15 @@ public final class MediaInfo {
      *
      * @param writer writer to dump the media information to
      */
-    public void dump(Writer writer) {
+    public HashMap<String, String> dump(Writer writer) {
+    	HashMap<String, String> m = new HashMap<String,String>();
         PrintWriter printer = new PrintWriter(writer);
         for (String sectionType : sectionsByType.keySet()) {
             int sectionNumber = 0;
             for (Section section : sectionsByType.get(sectionType)) {
                 printer.printf("%s [%d]%n", sectionType, sectionNumber++);
                 for (String key : section) {
+                	m.put(key, section.value(key));
                     printer.printf(" %30s -> %s%n", key, section.value(key));
                 }
             }
@@ -133,6 +136,7 @@ public final class MediaInfo {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return m;
     }
 
     @Override
